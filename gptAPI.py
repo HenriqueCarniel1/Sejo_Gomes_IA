@@ -3,51 +3,51 @@ from tkinter import messagebox, scrolledtext
 import requests
 from googletrans import Translator
 
-API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"
-API_KEY = "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"
+URL_API = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"
+CHAVE_API = "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"
 
-headers = {"Authorization": f"Bearer {API_KEY}"}
+cabecalhos = {"Authorization": f"Bearer {CHAVE_API}"}
 
-translator = Translator()
+tradutor = Translator()
 
-def translate_to_portuguese(text):
+def traduzir_para_portugues(texto):
     try:
-        translated = translator.translate(text, dest="pt")
-        return translated.text
+        traduzido = tradutor.translate(texto, dest="pt")
+        return traduzido.text
     except Exception as e:
         return "Erro na tradução: " + str(e)
 
-def generate_response():
-    user_input = input_text.get("1.0", "end-1c").strip() 
-    if not user_input:
+def gerar_resposta():
+    entrada_usuario = entrada_texto.get("1.0", "end-1c").strip()
+    if not entrada_usuario:
         messagebox.showwarning("Entrada Vazia", "Por favor, insira uma mensagem.")
         return
 
-    chat_output.config(state=tk.NORMAL)
-    chat_output.insert(tk.END, f"Você: {user_input}\n")
-    chat_output.config(state=tk.DISABLED)
-    input_text.delete("1.0", tk.END)
+    saida_chat.config(state=tk.NORMAL)
+    saida_chat.insert(tk.END, f"Você: {entrada_usuario}\n")
+    saida_chat.config(state=tk.DISABLED)
+    entrada_texto.delete("1.0", tk.END)
 
-    payload = {"inputs": user_input}
+    dados = {"inputs": entrada_usuario}
     try:
-        response = requests.post(API_URL, headers=headers, json=payload)
-        if response.status_code == 200:
-            result = response.json()
+        resposta = requests.post(URL_API, headers=cabecalhos, json=dados)
+        if resposta.status_code == 200:
+            resultado = resposta.json()
 
-            if isinstance(result, list):
-                bot_response = result[0].get("generated_text", "Desculpe, não consegui entender.")
-            elif isinstance(result, dict):
-                bot_response = result.get("generated_text", "Desculpe, não consegui entender.")
+            if isinstance(resultado, list):
+                resposta_ia = resultado[0].get("generated_text", "Desculpe, não consegui entender.")
+            elif isinstance(resultado, dict):
+                resposta_ia = resultado.get("generated_text", "Desculpe, não consegui entender.")
             else:
-                bot_response = "Resposta inesperada da IA."
+                resposta_ia = "Resposta inesperada da IA."
 
-            translated_response = translate_to_portuguese(bot_response)
+            resposta_traduzida = traduzir_para_portugues(resposta_ia)
 
-            chat_output.config(state=tk.NORMAL)
-            chat_output.insert(tk.END, f"IA (Traduzido): {translated_response}\n")
-            chat_output.config(state=tk.DISABLED)
+            saida_chat.config(state=tk.NORMAL)
+            saida_chat.insert(tk.END, f"IA (Traduzido): {resposta_traduzida}\n")
+            saida_chat.config(state=tk.DISABLED)
         else:
-            messagebox.showerror("Erro na API", f"Erro: {response.status_code} - {response.json()}")
+            messagebox.showerror("Erro na API", f"Erro: {resposta.status_code} - {resposta.json()}")
     except Exception as e:
         messagebox.showerror("Erro", f"Ocorreu um erro: {str(e)}")
 
@@ -55,13 +55,13 @@ app = tk.Tk()
 app.title("IA Generativa - Chat")
 app.geometry("500x600")
 
-chat_output = scrolledtext.ScrolledText(app, state=tk.DISABLED, wrap=tk.WORD, height=25, width=60)
-chat_output.pack(pady=10)
+saida_chat = scrolledtext.ScrolledText(app, state=tk.DISABLED, wrap=tk.WORD, height=25, width=60)
+saida_chat.pack(pady=10)
 
-input_text = tk.Text(app, height=4, width=60)
-input_text.pack(pady=10)
+entrada_texto = tk.Text(app, height=4, width=60)
+entrada_texto.pack(pady=10)
 
-send_button = tk.Button(app, text="Enviar", command=generate_response, bg="blue", fg="white")
-send_button.pack(pady=10)
+botao_enviar = tk.Button(app, text="Enviar", command=gerar_resposta, bg="blue", fg="white")
+botao_enviar.pack(pady=10)
 
 app.mainloop()
